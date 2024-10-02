@@ -23,10 +23,12 @@ class AttractionAdapter(private val dataSet: List<String>) :
     }
 
     class AttractionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val itemBinding = ItemListBinding.bind(itemView)
+        private val binding = ItemListBinding.bind(itemView)
 
         fun bind(attractionName: String) {
-            itemBinding.itemTitle.text = attractionName
+            binding.itemTitle.text = attractionName
         }
+
+        fun getRemoveButtonWidth(): Int = binding.removeButtonContainer.width
     }
 }
