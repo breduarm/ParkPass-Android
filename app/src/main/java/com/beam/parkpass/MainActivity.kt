@@ -21,5 +21,13 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        val attractions = getAttractions()
+        val attractionAdapter = AttractionAdapter(attractions)
+        binding.attractionList.adapter = attractionAdapter
     }
 }
