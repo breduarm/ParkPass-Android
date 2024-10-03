@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.beam.parkpass.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
+    private lateinit var attractionAdapter: AttractionAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,12 +31,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         val attractions = getAttractions()
-        val attractionAdapter = AttractionAdapter(attractions)
+        attractionAdapter = AttractionAdapter(attractions)
         binding.attractionList.adapter = attractionAdapter
     }
 
     private fun attachSwipeHelperToRecyclerView() {
-        val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback())
+        val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback(attractionAdapter))
         itemTouchHelper.attachToRecyclerView(binding.attractionList)
     }
 }

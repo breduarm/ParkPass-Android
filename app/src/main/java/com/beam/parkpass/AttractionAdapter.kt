@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.beam.parkpass.databinding.ItemListBinding
 
 class AttractionAdapter(private val dataSet: List<String>) :
-    RecyclerView.Adapter<AttractionAdapter.AttractionViewHolder>() {
+    RecyclerView.Adapter<AttractionAdapter.AttractionViewHolder>(), AttractionAdapterListener {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AttractionViewHolder {
         val view = LayoutInflater
@@ -30,5 +30,9 @@ class AttractionAdapter(private val dataSet: List<String>) :
         }
 
         fun getRemoveButtonWidth(): Int = binding.removeButtonContainer.width
+    }
+
+    override fun resetItemPosition(position: Int) {
+        notifyItemChanged(position)
     }
 }

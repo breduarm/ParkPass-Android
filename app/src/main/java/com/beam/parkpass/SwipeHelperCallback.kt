@@ -5,7 +5,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.absoluteValue
 
-class SwipeHelperCallback : ItemTouchHelper.SimpleCallback(
+class SwipeHelperCallback(
+    private val listener: AttractionAdapterListener
+) : ItemTouchHelper.SimpleCallback(
     0,
     ItemTouchHelper.START or ItemTouchHelper.END
 ) {
@@ -22,8 +24,15 @@ class SwipeHelperCallback : ItemTouchHelper.SimpleCallback(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val position = viewHolder.layoutPosition
-        hasBeenSwipedMap[position] = true
+        when(direction) {
+            ItemTouchHelper.END -> {
+                listener.resetItemPosition(viewHolder.layoutPosition)
+            }
+            else -> {
+                val position = viewHolder.layoutPosition
+                hasBeenSwipedMap[position] = true
+            }
+        }
     }
 
     override fun onChildDraw(
