@@ -1,18 +1,19 @@
 package com.beam.parkpass
 
+import android.content.Context
 import android.graphics.Canvas
+import android.util.TypedValue
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.absoluteValue
 
-class SwipeHelperCallback(
-    private val listener: AttractionAdapterListener
-) : ItemTouchHelper.SimpleCallback(
+class SwipeHelperCallback(private val maxSwipeDistance: Int) : ItemTouchHelper.SimpleCallback(
     0,
     ItemTouchHelper.START or ItemTouchHelper.END
 ) {
-    private val hasBeenSwipedMap = HashMap<Int, Boolean>()
-    private var previousStatusMap = HashMap<Int, Boolean>()
+    private var currentScrollX = 0
+    private var currentScrollXWhenInActive = 0
+    private var initXWhenInactive = 0f
+    private var firstInActive = false
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -24,15 +25,7 @@ class SwipeHelperCallback(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        when(direction) {
-            ItemTouchHelper.END -> {
-                listener.resetItemPosition(viewHolder.layoutPosition)
-            }
-            else -> {
-                val position = viewHolder.layoutPosition
-                hasBeenSwipedMap[position] = true
-            }
-        }
+        // No action needed
     }
 
     override fun onChildDraw(
@@ -45,32 +38,33 @@ class SwipeHelperCallback(
         isCurrentlyActive: Boolean
     ) {
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-            if (previousStatusMap[viewHolder.layoutPosition] == null) {
-                previousStatusMap[viewHolder.layoutPosition] = isCurrentlyActive
+
+            if (dX == 0f) {
+                currentScrollX = viewHolder.itemView.scrollX
+                firstInActive = true
             }
 
-            val itemView = viewHolder.itemView
-            val attractionViewHolder = viewHolder as AttractionAdapter.AttractionViewHolder
-            val maxSwipeDistance = -attractionViewHolder.getRemoveButtonWidth().toFloat()
+            if (isCurrentlyActive) {
+                // Swipe with finger
 
-            var constrainedDx = dX.coerceAtLeast(maxSwipeDistance)
-
-            when {
-                hasBeenSwipedMap[viewHolder.layoutPosition] == true -> {
-                    val dXDifference = (1440 - dX.absoluteValue)
-                    constrainedDx += dXDifference
-                    if (constrainedDx > 0) {
-                        itemView.translationX = 0f
-                        if (previousStatusMap[viewHolder.layoutPosition] == false && isCurrentlyActive) {
-                            hasBeenSwipedMap.remove(viewHolder.layoutPosition)
-                        }
-                        previousStatusMap[viewHolder.layoutPosition] = isCurrentlyActive
-                    } else {
-                        itemView.translationX = constrainedDx
-                    }
+                var scrollOffset = currentScrollX + (-dX).toInt()
+                if (scrollOffset > maxSwipeDistance) {
+                    scrollOffset = maxSwipeDistance
+                } else if (scrollOffset < 0){
+                    scrollOffset = 0
                 }
-                else -> {
-                    itemView.translationX = constrainedDx
+                viewHolder.itemView.scrollTo(scrollOffset, 0)
+            } else {
+                // Swipe auto animation
+
+                if (firstInActive) {
+                    firstInActive = false
+                    currentScrollXWhenInActive = viewHolder.itemView.scrollX
+                    initXWhenInactive = dX
+                }
+
+                if (viewHolder.itemView.scrollX < maxSwipeDistance) {
+                    viewHolder.itemView.scrollTo((currentScrollXWhenInActive * dX / initXWhenInactive).toInt(), 0)
                 }
             }
         } else {
@@ -78,5 +72,17 @@ class SwipeHelperCallback(
         }
     }
 
-    override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float = 2f
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+
+        if (viewHolder.itemView.scrollX > maxSwipeDistance) {
+            viewHolder.itemView.scrollTo(maxSwipeDistance, 0)
+        } else if (viewHolder.itemView.scrollX < 0) {
+            viewHolder.itemView.scrollTo(0, 0)
+        }
+    }
+
+    override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float = Float.MAX_VALUE
+
+    override fun getSwipeEscapeVelocity(defaultValue: Float): Float = Float.MAX_VALUE
 }
