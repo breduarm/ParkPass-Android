@@ -3,6 +3,7 @@ package com.beam.parkpass
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.beam.parkpass.databinding.ItemListBinding
 
@@ -25,8 +26,12 @@ class AttractionAdapter(private val dataSet: List<String>) :
     class AttractionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val binding = ItemListBinding.bind(itemView)
 
-        fun bind(attractionName: String) {
-            binding.itemTitle.text = attractionName
+        fun bind(attractionName: String) = with(binding) {
+            itemTitle.text = attractionName
+            removeButtonContainer.setOnClickListener {
+                Toast.makeText(this.root.context, "Remove button clicked", Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
 
         fun getRemoveButtonWidth(): Int = binding.removeButtonContainer.width
